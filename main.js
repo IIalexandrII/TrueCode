@@ -4,7 +4,7 @@ console.clear();
 import fetch from 'node-fetch';
 import express from "express";
 import bodyParser from "body-parser";
-import {Model} from "./dataFromYandexAPI.js";
+import {Model} from "./dataFromAPI.js";
 
 const __dirname = new URL("./",import.meta.url).href.slice(8);
 const token = 'y0_AgAAAABu9NRrAAolqgAAAADnKTk34NU7eXSCTiG-M1YC6p-zwSwK9bc';
