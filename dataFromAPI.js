@@ -1,12 +1,42 @@
 export class Model{
-   constructor(token){
-      this.token=token;
+   constructor(tokenYandex,tokenTopVisor){
+      this.tokenYandex=tokenYandex;
+      this.tokenTopVisor=tokenTopVisor;
    }
+   async getIDs(){
+      let IDs = new Array();
+      let yandexReqData = (await (await fetch("https://api-metrika.yandex.net/management/v1/counters",{ method:'GET',headers:{Authorization:'OAuth '+ this.tokenYandex}})).json()).counters;
+      for(let item of yandexReqData){
+         IDs.push({idYandex:item.id,name:item.name,site:item.site});
+      }
+
+      await fetch("https://api.topvisor.com/v2/json/get/projects_2/projects",{
+         method:"POST",
+         headers:{
+            "Content-Type": "application/json",
+            "User-Id":"358921",
+            "Authorization": "bearer " + this.tokenTopVisor
+         },
+         body:JSON.stringify({"fields":["id","name","url"]})
+      })
+         .then(req=>req.json())
+         .then(data=>{
+            for(let prodTopVisor of data.result){
+               for(let item of IDs){
+                  if(prodTopVisor.url === item.site){
+                     item.idTopVisor = prodTopVisor.id;
+                  }
+               }
+            }
+         });
+      return IDs
+   }
+
    async SourcesForPeriod(date1,date2,id){
       let dataSource = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&dimensions=ym:s:<attribution>TrafficSource&attribution=cross_device_last_significant&filters=ym:s:isRobot=='No'&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
                                  method:'GET',
-                                 headers:{Authorization:'OAuth '+this.token}
+                                 headers:{Authorization:'OAuth '+this.tokenYandex}
                               })
          .then(resp=>resp.json())
          .then(data=>{   
@@ -20,11 +50,12 @@ export class Model{
          });
       return dataSource;
    }
+
    async DynamicsSiteTrafficForPeriod(date1,date2,id){
       let dataTraffic = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data/bytime?date1=${date1}&date2=${date2}&group=day&metrics=ym:s:visits,ym:s:users&filters=ym:s:<attribution>TrafficSource=='organic' AND ym:s:isRobot=='No'&attribution=lastsign&lang=ru&id=${id}`,{
                                  method:'GET',
-                                 headers:{Authorization:'OAuth '+this.token}
+                                 headers:{Authorization:'OAuth '+this.tokenYandex}
                               })
          .then(resp=>resp.json())
          .then(data=>{
@@ -38,11 +69,12 @@ export class Model{
           });
       return dataTraffic;
    }
+
    async SearchPhrase(date1,date2,id,minUserOrVisit){
       let dataPhrase = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filters=(ym:s:visits>${minUserOrVisit} OR ym:s:users>${minUserOrVisit}) AND ym:s:isRobot=='No'&dimensions=ym:s:SearchPhrase&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
                                  method:'GET',
-                                 headers:{Authorization:'OAuth '+this.token}
+                                 headers:{Authorization:'OAuth '+this.tokenYandex}
                               })
          .then(resp=>resp.json())
          .then(data=>{
@@ -56,11 +88,12 @@ export class Model{
          });
       return dataPhrase;
    }
+
    async DeviceCategory(date1,date2,id,){
       let dataDevice = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filters=ym:s:isRobot=='No'&dimensions=ym:s:deviceCategory&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
                                  method:'GET',
-                                 headers:{Authorization:'OAuth '+this.token}
+                                 headers:{Authorization:'OAuth '+this.tokenYandex}
                               })
          .then(resp=>resp.json())
          .then(data=>{
@@ -74,11 +107,12 @@ export class Model{
          });
       return dataDevice;
    }
+
    async SearchEngine(date1,date2,id,){
       let dataSearchEngine = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&dimensions=ym:s:<attribution>SearchEngineRoot&attribution=cross_device_last_significant&filters=ym:s:isRobot=='NO'&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
                                  method:'GET',
-                                 headers:{Authorization:'OAuth '+this.token}
+                                 headers:{Authorization:'OAuth '+this.tokenYandex}
                               })
          .then(resp=>resp.json())
          .then(data=>{
@@ -92,12 +126,13 @@ export class Model{
          });
       return dataSearchEngine;
    }
+
    async Conversion(date1,date2,id,){
       let dataGoalIDs = new Array();
       let dataConversion = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filteres=ym:s:isRobot=='NO'&dimensions=ym:s:goal&metrics=ym:s:anyGoalConversionRate&lang=ru&id=${id}`,{
                                  method:'GET',
-                                 headers:{Authorization:'OAuth '+this.token}
+                                 headers:{Authorization:'OAuth '+this.tokenYandex}
                               })
          .then(resp=>resp.json())
          .then(data=>{
@@ -109,11 +144,51 @@ export class Model{
                      }
          });
          for(let i = 0;i<dataGoalIDs.length;i++){
-            await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&metrics=ym:s:goal<goal_id>conversionRate&goal_id=${dataGoalIDs[i].id}&lang=ru&id=${id}`,{method:"GET",headers:{Authorization:'OAuth '+this.token}})
+            await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&metrics=ym:s:goal<goal_id>conversionRate&goal_id=${dataGoalIDs[i].id}&lang=ru&id=${id}`,{method:"GET",headers:{Authorization:'OAuth '+this.tokenYandex}})
                .then(resp=>resp.json())
                .then(data=>dataConversion.push({goalName:dataGoalIDs[i].name, conversion:data.data[0].metrics[0]}))
          }
       return dataConversion;
+   }
+
+   async persentOutTop10(date1, date2, id){
+      let requestDataTopVisor = {
+         filters:[{
+            name :"id",
+            operator:"EQUALS",
+            values:[id]
+            }],
+         show_searchers_and_regions:true
+      }
+      await fetch('https://api.topvisor.com/v2/json/get/projects_2/projects',
+         {
+            method:"POST",
+            headers:{
+               "Content-Type": "application/json",
+               "User-Id":"358921",
+               "Authorization": "bearer " + this.tokenTopVisor
+            },
+            body:JSON.stringify(requestDataTopVisor)
+         })
+         .then(req=>req.json())
+         .then(data=>{
+            let newarr = data.result[0].searchers.map((item)=>[item.regions.map((item)=>item.index),item.name]);
+            console.log(newarr);
+         });
+      await fetch("https://api.topvisor.com/v2/json/get/positions_2/summary_chart",
+      {
+         method:"POST",
+         headers:{
+            "Content-Type": "application/json",
+            "User-Id":"358921",
+            "Authorization": "bearer " + this.tokenTopVisor
+         },
+         body:JSON.stringify({project_id:id, region_index:152, dates:[date1,date2],  show_tops:1})
+      })
+         .then(req=>req.json())
+         .then(data=>{
+            console.log(data.result.seriesByProjectsId);
+         });
    }
 }
 

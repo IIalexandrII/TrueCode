@@ -7,15 +7,17 @@ async function start(){
    let test='<option value="no"selected></option>';   
    //console.log(ids);
    for(id of ids){
-      test+=`<option value='${id.id}'>${id.name}</option>`;
+      test+=`<option value='${id.idYandex}_${id.idTopVisor}'>${id.name}</option>`;
    }
    select.innerHTML = test;
 }
 
 async function getData(){
    if(select.value=="no"){console.log("nononono");return;}
+   console.log(); 
    let dates = {
-      id: select.value,
+      idYandex: select.value.split("_")[0],
+      idTopVisor:select.value.split("_")[1],
       dateForSource:{
          start:"2023-07-03",
          end:"2023-07-09"
@@ -27,7 +29,7 @@ async function getData(){
       dateForPhrase:{
          start:"2023-07-03",
          end:"2023-07-09",
-         minValue:5
+         minValue:0
       },
       dateForDevice:{
          start:"2023-07-03",

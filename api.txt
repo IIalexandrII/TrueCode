@@ -28,21 +28,3 @@ https://api-metrika.yandex.net/management/v1/counters -> список счетч
 
 
 https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filteres=ym:s:isRobot=='NO'&dimensions=ym:s:goal&metrics=ym:s:anyGoalConversionRate&lang=ru&id=${id}
-
-https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&metrics=ym:s:goal<goal_id>conversionRate&goal_id=53165022&lang=ru&id=${id}
-dimensions: [
-    {
-      name: 'Клик по кнопке "Посмотреть все материалы" в калькуляторе',
-      id: '53165022'
-    }
-  ],
-  metrics: [ 100 ]
-  {
-  dimensions: [
-    {
-      name: 'Отправка формы Заказать звонок в шапке Ирк',
-      id: '53170356'
-    }
-  ],
-  metrics: [ 100 ]
-  ym:s:goal30606879conversionRate

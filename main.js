@@ -7,8 +7,10 @@ import bodyParser from "body-parser";
 import {Model} from "./dataFromAPI.js";
 
 const __dirname = new URL("./",import.meta.url).href.slice(8);
-const token = 'y0_AgAAAABu9NRrAAolqgAAAADnKTk34NU7eXSCTiG-M1YC6p-zwSwK9bc';
-const model = new Model(token);
+const tokenYandex = 'y0_AgAAAABu9NRrAAolqgAAAADnKTk34NU7eXSCTiG-M1YC6p-zwSwK9bc';
+const tokenTopVisor = '46d84eaa08c50379ce6b59607e0d5b79';
+const model = new Model(tokenYandex,tokenTopVisor);
+model.persentOutTop10("2023-06-01","2023-06-30","7784199");
 
 const app = express();
 const hostname="0.0.0.0";
@@ -23,34 +25,29 @@ app.get('/',(req, res)=>{
 });
 
 app.get('/getIds',async (req,res)=>{
-   let response = new Array();
-   let yandexReq = await fetch("https://api-metrika.yandex.net/management/v1/counters",{ method:'GET',headers:{Authorization:'OAuth '+token}})
-   let data = (await yandexReq.json()).counters;
-   for(let item of data){
-      response.push({id:item.id,name:item.name,site:item.site});
-   }
+   let response = await model.getIDs();
    res.send(response);
 });
 
 app.post('/getData',async (req,res)=>{
    console.log(req.body);
 
-   let dataSource = await model.SourcesForPeriod(req.body.dateForSource.start, req.body.dateForSource.end, req.body.id);
+   let dataSource = await model.SourcesForPeriod(req.body.dateForSource.start, req.body.dateForSource.end, req.body.idYandex);
    //console.log(dataSource);
 
-   let dataTraffic = await model.DynamicsSiteTrafficForPeriod(req.body.dateForTraffic.start, req.body.dateForTraffic.end, req.body.id);
+   let dataTraffic = await model.DynamicsSiteTrafficForPeriod(req.body.dateForTraffic.start, req.body.dateForTraffic.end, req.body.idYandex);
    //console.log(dataTraffic);
 
-   let dataPhrase = await model.SearchPhrase(req.body.dateForPhrase.start, req.body.dateForPhrase.end, req.body.id, req.body.dateForPhrase.minValue);
+   let dataPhrase = await model.SearchPhrase(req.body.dateForPhrase.start, req.body.dateForPhrase.end, req.body.idYandex, req.body.dateForPhrase.minValue);
    //console.log(dataPhrase);
 
-   let dataDevice = await model.DeviceCategory(req.body.dateForDevice.start, req.body.dateForDevice.end, req.body.id);
+   let dataDevice = await model.DeviceCategory(req.body.dateForDevice.start, req.body.dateForDevice.end, req.body.idYandex);
    // console.log(dataDevice);
 
-   let dataSearchEngine = await model.SearchEngine(req.body.dateForSearchEngine.start, req.body.dateForSearchEngine.end, req.body.id);
+   let dataSearchEngine = await model.SearchEngine(req.body.dateForSearchEngine.start, req.body.dateForSearchEngine.end, req.body.idYandex);
    // console.log(dataSearchEngine);
 
-   let dataConversion = await model.Conversion(req.body.dateForConversion.start, req.body.dateForConversion.end, req.body.id);
+   let dataConversion = await model.Conversion(req.body.dateForConversion.start, req.body.dateForConversion.end, req.body.idYandex);
    // console.log(dataConversion);
 
    res.send({
