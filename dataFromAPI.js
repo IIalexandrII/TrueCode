@@ -200,6 +200,62 @@ export class Model{
       }
      return result;
    }
+
+   async comparisonKeywords(id){
+      let requestDataTopVisor1 = {
+         filters:[{
+            name :"id",
+            operator:"EQUALS",
+            values:[id]
+            }],
+         show_searchers_and_regions:true,
+      }
+      await fetch('https://api.topvisor.com/v2/json/get/projects_2/projects',
+         {
+            method:"POST",
+            headers:{
+               "Content-Type": "application/json",
+               "User-Id":"358921",
+               "Authorization": "bearer " + this.tokenTopVisor
+            },
+            body:JSON.stringify(requestDataTopVisor1)
+         })
+         .then(req=>req.json())
+         .then(data=>{
+            let a = 0;
+            let serarchAndRegion = data.result[0].searchers.map((item)=>[item.regions.reduce((acc, item)=>{return item.index},a),item.name]);
+            console.log(serarchAndRegion)
+         });
+
+      let date = new Date();
+      let date2 = date.toISOString().split("T")[0];
+      date.setMonth(date.getMonth()-1);
+      
+      let date1 = date.toISOString().split("T")[0];
+      console.log(date1,date2)
+      let requestDataTopVisor = {
+         project_id:id,
+         regions_indexes:[88,152],
+         date1:date1,
+         date2:date2,
+         count_dates:1
+         //fields:['name',`position:2023-06-27:${id}:88`]
+      }
+      await fetch('https://api.topvisor.com/v2/json/get/positions_2/history',
+         {
+            method:"POST",
+            headers:{
+               "Content-Type": "application/json",
+               "User-Id":"358921",
+               "Authorization": "bearer " + this.tokenTopVisor
+            },
+            body:JSON.stringify(requestDataTopVisor)
+         })
+         .then(req=>req.json())
+         .then(data=>{
+            console.log(data.result.keywords,data.result.keywords[0].name);
+         });
+   }
 }
 
 
