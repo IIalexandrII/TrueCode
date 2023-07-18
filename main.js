@@ -10,7 +10,7 @@ const __dirname = new URL("./",import.meta.url).href.slice(8);
 const tokenYandex = 'y0_AgAAAABu9NRrAAolqgAAAADnKTk34NU7eXSCTiG-M1YC6p-zwSwK9bc';
 const tokenTopVisor = '46d84eaa08c50379ce6b59607e0d5b79';
 const model = new Model(tokenYandex,tokenTopVisor);
-model.persentOutTop10("2023-06-01","2023-06-30","7784199");
+
 
 const app = express();
 const hostname="0.0.0.0";
@@ -50,13 +50,17 @@ app.post('/getData',async (req,res)=>{
    let dataConversion = await model.Conversion(req.body.dateForConversion.start, req.body.dateForConversion.end, req.body.idYandex);
    // console.log(dataConversion);
 
+   let dataTopsTopvisor = await model.persentOutTop10(req.body.idTopVisor);
+   console.log(dataTopsTopvisor);
+
    res.send({
       source:dataSource,
       traffic:dataTraffic,
       phrase:dataPhrase,
       device:dataDevice,
       searchEngine:dataSearchEngine,
-      conversion:dataConversion
+      conversion:dataConversion,
+      topsTopvisor:dataTopsTopvisor
    });
 });
 

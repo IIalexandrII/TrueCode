@@ -151,14 +151,19 @@ export class Model{
       return dataConversion;
    }
 
-   async persentOutTop10(date1, date2, id){
+   async persentOutTop10(id){
+      let date = new Date();
+      let date2 = date.toISOString().split("T")[0];
+      date.setMonth(date.getMonth()-1);
+      let date1 = date.toISOString().split("T")[0];
+      let serarchAndRegion;
       let requestDataTopVisor = {
          filters:[{
             name :"id",
             operator:"EQUALS",
             values:[id]
             }],
-         show_searchers_and_regions:true
+         show_searchers_and_regions:true,
       }
       await fetch('https://api.topvisor.com/v2/json/get/projects_2/projects',
          {
@@ -172,23 +177,28 @@ export class Model{
          })
          .then(req=>req.json())
          .then(data=>{
-            let newarr = data.result[0].searchers.map((item)=>[item.regions.map((item)=>item.index),item.name]);
-            console.log(newarr);
+            let a = 0;
+            serarchAndRegion = data.result[0].searchers.map((item)=>[item.regions.reduce((acc, item)=>{return item.index},a),item.name]);
+            
          });
-      await fetch("https://api.topvisor.com/v2/json/get/positions_2/summary_chart",
-      {
-         method:"POST",
-         headers:{
-            "Content-Type": "application/json",
-            "User-Id":"358921",
-            "Authorization": "bearer " + this.tokenTopVisor
-         },
-         body:JSON.stringify({project_id:id, region_index:152, dates:[date1,date2],  show_tops:1})
-      })
-         .then(req=>req.json())
-         .then(data=>{
-            console.log(data.result.seriesByProjectsId);
-         });
+      let result = new Array();
+      for(let serarch of serarchAndRegion){
+         await fetch("https://api.topvisor.com/v2/json/get/positions_2/summary",
+         {
+            method:"POST",
+            headers:{
+               "Content-Type": "application/json",
+               "User-Id":"358921",
+               "Authorization": "bearer " + this.tokenTopVisor
+            },
+            body:JSON.stringify({project_id:id, region_index:serarch[0], dates:[date1,date2],  show_tops:1,show_dynamics: 1})
+         })
+            .then(req=>req.json())
+            .then(data=>{
+               result.push({name:serarch[1], numberOfSearchresultTop:data.result.tops[1]['1_10'], all:data.result.dynamics.all});
+            });
+      }
+     return result;
    }
 }
 
