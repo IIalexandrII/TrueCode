@@ -156,7 +156,7 @@ export class Model{
       let date2 = date.toISOString().split("T")[0];
       date.setMonth(date.getMonth()-1);
       let date1 = date.toISOString().split("T")[0];
-      let serarchAndRegion;
+      let searchAndRegion;
       let requestDataTopVisor = {
          filters:[{
             name :"id",
@@ -178,11 +178,11 @@ export class Model{
          .then(req=>req.json())
          .then(data=>{
             let a = 0;
-            serarchAndRegion = data.result[0].searchers.map((item)=>[item.regions.reduce((acc, item)=>{return item.index},a),item.name]);
+            searchAndRegion = data.result[0].searchers.map((item)=>[item.regions.reduce((acc, item)=>{return item.index},a),item.name]);
             
          });
       let result = new Array();
-      for(let serarch of serarchAndRegion){
+      for(let search of searchAndRegion){
          await fetch("https://api.topvisor.com/v2/json/get/positions_2/summary",
          {
             method:"POST",
@@ -191,11 +191,11 @@ export class Model{
                "User-Id":"358921",
                "Authorization": "bearer " + this.tokenTopVisor
             },
-            body:JSON.stringify({project_id:id, region_index:serarch[0], dates:[date1,date2],  show_tops:1,show_dynamics: 1})
+            body:JSON.stringify({project_id:id, region_index:search[0], dates:[date1,date2],  show_tops:1,show_dynamics: 1})
          })
             .then(req=>req.json())
             .then(data=>{
-               result.push({name:serarch[1], numberOfSearchresultTop:data.result.tops[1]['1_10'], all:data.result.dynamics.all});
+               result.push({name:search[1], numberOfSearchresultTop:data.result.tops[1]['1_10'], all:data.result.dynamics.all});
             });
       }
      return result;
@@ -210,6 +210,7 @@ export class Model{
             }],
          show_searchers_and_regions:true,
       }
+      let searchers = new Array();
       await fetch('https://api.topvisor.com/v2/json/get/projects_2/projects',
          {
             method:"POST",
@@ -222,39 +223,77 @@ export class Model{
          })
          .then(req=>req.json())
          .then(data=>{
-            let a = 0;
-            let serarchAndRegion = data.result[0].searchers.map((item)=>[item.regions.reduce((acc, item)=>{return item.index},a),item.name]);
-            console.log(serarchAndRegion)
+            let tempArrayRegions = new Array();
+            let count;
+            for(let search of data.result[0].searchers){
+               count=0;
+               for(let region of search.regions){
+                  tempArrayRegions[count]={name:region.name, index:String(region.index)};
+                  count+=1;
+               }
+               searchers.push({name:search.name, regions:tempArrayRegions});
+               tempArrayRegions = tempArrayRegions.splice(1,tempArrayRegions.length);
+            }
          });
-
+      
       let date = new Date();
       let date2 = date.toISOString().split("T")[0];
       date.setMonth(date.getMonth()-1);
-      
       let date1 = date.toISOString().split("T")[0];
-      console.log(date1,date2)
-      let requestDataTopVisor = {
-         project_id:id,
-         regions_indexes:[88,152],
-         date1:date1,
-         date2:date2,
-         count_dates:1
-         //fields:['name',`position:2023-06-27:${id}:88`]
+      let indexes = new Array();
+      for(let search of searchers){
+         for(let region of search.regions){
+            indexes.push(region.index);
+         }
       }
-      await fetch('https://api.topvisor.com/v2/json/get/positions_2/history',
-         {
-            method:"POST",
-            headers:{
-               "Content-Type": "application/json",
-               "User-Id":"358921",
-               "Authorization": "bearer " + this.tokenTopVisor
-            },
-            body:JSON.stringify(requestDataTopVisor)
-         })
-         .then(req=>req.json())
-         .then(data=>{
-            console.log(data.result.keywords,data.result.keywords[0].name);
-         });
+      let requestDataTopVisor;
+      let result = new Array();
+      for(let i=0;i<2;i++){
+         requestDataTopVisor = {
+            project_id:id,
+            regions_indexes:indexes,
+            date1:date1,
+            date2:date2,
+            count_dates:1
+         }
+         await fetch('https://api.topvisor.com/v2/json/get/positions_2/history',
+            {
+               method:"POST",
+               headers:{
+                  "Content-Type": "application/json",
+                  "User-Id":"358921",
+                  "Authorization": "bearer " + this.tokenTopVisor
+               },
+               body:JSON.stringify(requestDataTopVisor)
+            })
+            .then(req=>req.json())
+            .then(data=>{
+               let dataPosition = new Array();
+               let nameSearch, tempIndex;
+               for(let keyword of data.result.keywords){
+                  let position=new Array();
+                  for(let key in keyword.positionsData){
+                     tempIndex = key.split(':')[2]
+
+                     for(let search of searchers){
+                        for(let region of search.regions){
+                           if(region.index===tempIndex){
+                              nameSearch = search.name;
+                           }
+                        }
+                     }
+
+                     position.push({searchName:nameSearch, position:keyword.positionsData[key]});
+                  }
+                  dataPosition.push({keyword:keyword.name, position:position})
+               }
+               result.push({month:date.getMonth()+2, positions: dataPosition});
+            });
+            date2 = date.toISOString().split("T")[0];
+            date.setMonth(date.getMonth()-1);
+            date1 = date.toISOString().split("T")[0];
+      }
+      return result;
    }
 }
 

@@ -9,7 +9,7 @@ const __dirname = new URL("./",import.meta.url).href.slice(8);
 const tokenYandex = 'y0_AgAAAABu9NRrAAolqgAAAADnKTk34NU7eXSCTiG-M1YC6p-zwSwK9bc';
 const tokenTopVisor = '46d84eaa08c50379ce6b59607e0d5b79';
 const model = new Model(tokenYandex,tokenTopVisor);
-model.comparisonKeywords("7784199");
+
 
 const app = express();
 const hostname="0.0.0.0";
@@ -52,6 +52,8 @@ app.post('/getData',async (req,res)=>{
    let dataTopsTopvisor = await model.persentOutTop10(req.body.idTopVisor);
    //console.log(dataTopsTopvisor);
 
+   let dataComparisonKeywordsTopvisor = await model.comparisonKeywords(req.body.idTopVisor);
+
    res.send({
       source:dataSource,
       traffic:dataTraffic,
@@ -59,7 +61,8 @@ app.post('/getData',async (req,res)=>{
       device:dataDevice,
       searchEngine:dataSearchEngine,
       conversion:dataConversion,
-      topsTopvisor:dataTopsTopvisor
+      topsTopvisor:dataTopsTopvisor,
+      comparisonKeywordsTopvisor:dataComparisonKeywordsTopvisor
    });
 });
 
