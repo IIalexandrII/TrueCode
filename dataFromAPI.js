@@ -127,7 +127,7 @@ export class Model{
       return dataSearchEngine;
    }
 
-   async Conversion(date1,date2,id,){
+   async Conversion(date1,date2,id){
       let dataGoalIDs = new Array();
       let dataConversion = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filteres=ym:s:isRobot=='NO'&dimensions=ym:s:goal&metrics=ym:s:anyGoalConversionRate&lang=ru&id=${id}`,{
@@ -143,11 +143,11 @@ export class Model{
                            });
                      }
          });
-         for(let i = 0;i<dataGoalIDs.length;i++){
-            await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&metrics=ym:s:goal<goal_id>conversionRate&goal_id=${dataGoalIDs[i].id}&lang=ru&id=${id}`,{method:"GET",headers:{Authorization:'OAuth '+this.tokenYandex}})
-               .then(resp=>resp.json())
-               .then(data=>dataConversion.push({goalName:dataGoalIDs[i].name, conversion:data.data[0].metrics[0]}))
-         }
+      for(let i = 0;i<dataGoalIDs.length;i++){
+         await fetch(`https://api-metrika.yandex.net/stat/v1/data/bytime?group=day&date1=${date1}&date2=${date2}&metrics=ym:s:goal<goal_id>conversionRate&goal_id=${dataGoalIDs[i].id}&lang=ru&id=${id}`,{method:"GET",headers:{Authorization:'OAuth '+this.tokenYandex}})
+            .then(resp=>resp.json())
+            .then(data=>dataConversion.push({goalName:dataGoalIDs[i].name, conversion:data.data[0].metrics[0]}))
+      }
       return dataConversion;
    }
 
