@@ -31,7 +31,6 @@ export class Model{
          });
       return IDs
    }
-
    async SourcesForPeriod(date1,date2,id){
       let dataSource = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&dimensions=ym:s:<attribution>TrafficSource&attribution=cross_device_last_significant&filters=ym:s:isRobot=='No'&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
@@ -50,7 +49,6 @@ export class Model{
          });
       return dataSource;
    }
-
    async DynamicsSiteTrafficForPeriod(date1,date2,id){
       let dataTraffic = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data/bytime?date1=${date1}&date2=${date2}&group=day&metrics=ym:s:visits,ym:s:users&filters=ym:s:<attribution>TrafficSource=='organic' AND ym:s:isRobot=='No'&attribution=lastsign&lang=ru&id=${id}`,{
@@ -69,7 +67,6 @@ export class Model{
           });
       return dataTraffic;
    }
-
    async SearchPhrase(date1,date2,id,minUserOrVisit){
       let dataPhrase = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filters=(ym:s:visits>${minUserOrVisit} OR ym:s:users>${minUserOrVisit}) AND ym:s:isRobot=='No'&dimensions=ym:s:SearchPhrase&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
@@ -88,7 +85,6 @@ export class Model{
          });
       return dataPhrase;
    }
-
    async DeviceCategory(date1,date2,id,){
       let dataDevice = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&filters=ym:s:isRobot=='No'&dimensions=ym:s:deviceCategory&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
@@ -107,7 +103,6 @@ export class Model{
          });
       return dataDevice;
    }
-
    async SearchEngine(date1,date2,id,){
       let dataSearchEngine = new Array();
       await fetch(`https://api-metrika.yandex.net/stat/v1/data?date1=${date1}&date2=${date2}&dimensions=ym:s:<attribution>SearchEngineRoot&attribution=cross_device_last_significant&filters=ym:s:isRobot=='NO'&metrics=ym:s:visits,ym:s:users&lang=ru&id=${id}`,{
@@ -126,7 +121,6 @@ export class Model{
          });
       return dataSearchEngine;
    }
-
    async Conversion(date1,date2,id){
       let dataGoalIDs = new Array();
       let dataConversion = new Array();
@@ -150,7 +144,6 @@ export class Model{
       }
       return dataConversion;
    }
-
    async persentOutTop10(id){
       let date = new Date();
       let date2 = date.toISOString().split("T")[0];
@@ -200,7 +193,6 @@ export class Model{
       }
      return result;
    }
-
    async comparisonKeywords(id){
       let requestDataTopVisor1 = {
          filters:[{
@@ -296,6 +288,3 @@ export class Model{
       return result;
    }
 }
-
-
-
