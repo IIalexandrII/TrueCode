@@ -11,8 +11,8 @@ import mysql from "mysql2"
 import {Model} from './dataFromAPI.js'
 
 
-const tokenYandex = 'y0_AgAAAABu9NRrAAolqgAAAADnKTk34NU7eXSCTiG-M1YC6p-zwSwK9bc';
-const tokenTopVisor = '46d84eaa08c50379ce6b59607e0d5b79';
+const tokenYandex = '';
+const tokenTopVisor = '';
 const getData = new Model(tokenYandex,tokenTopVisor);
 
 const conn = mysql.createConnection({
